@@ -1,0 +1,14 @@
+{
+  "name": "alevel_project",
+  "version": "1.0.0",
+  "main": "rolimons_api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module"
+}
