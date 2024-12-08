@@ -1,25 +1,41 @@
 import express from 'express';
-import { selectItemOfTheDay, setupDatabase } from './database.js';
+import sqlite3 from 'sqlite3';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const db = new sqlite3.Database('rolimons.db'); // Your SQLite database
 
-// Serve frontend
+// Middleware to serve static files (e.g., your HTML, CSS, JS files)
 app.use(express.static('public'));
 
-// API Routes
-app.get('/item-of-the-day', async (req, res) => {
-    try {
-        const item = await selectItemOfTheDay();
-        res.json(item);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch item of the day' });
-    }
+// Route to fetch the item of the day
+app.get('/item-of-the-day', (req, res) => {
+    db.get('SELECT * FROM items ORDER BY RANDOM() LIMIT 1', [], (err, row) => {
+        if (err) {
+            console.error(err);
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        if (!row) {
+            res.status(404).json({ error: 'No items found' });
+            return;
+        }
+        res.json(row); // Send the item data as JSON
+    });
 });
 
-// Start the server
+// Route to fetch all items ordered by price (desc)
+app.get('/items', (req, res) => {
+    db.all("SELECT * FROM items ORDER BY price DESC", [], (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(rows); // Send all items as JSON
+    });
+});
+
+// Start the server on port 3000
+const PORT = 3000;
 app.listen(PORT, () => {
-    setupDatabase(); // Initialize database
     console.log(`Server is running on http://localhost:${PORT}`);
 });
